@@ -1,0 +1,6 @@
+/* Styles specific to the landing page */
+
+/* Example: Custom style for the hero section */
+.hero-section-gradient {
+    background-image: linear-gradient(to bottom right, #1E40AF, #1D4ED8, #F59E0B);
+}

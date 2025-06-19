@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}My Tickets - LottoGo{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/my_tickets.css') }}">
+{% endblock %}
+
+{% block navigation %}
+    {% include 'components/_dashboard_nav.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">My Tickets</h1>
+            <p class="text-gray-600 mt-2">View your past and upcoming lottery tickets.</p>
+        </div>
+
+        <!-- Ticket List -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            {% if tickets %}
+                <div class="space-y-6">
+                    {% include 'components/_ticket_list.html' %}
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No Tickets Yet</h3>
+                    <p class="mt-1 text-sm text-gray-500">You haven't purchased any tickets. Go play a game!</p>
+                    <div class="mt-6">
+                        <a href="{{ url_for('dashboard') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-lotto-blue hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lotto-blue">
+                            Play Now
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/my_tickets.js') }}"></script>
+{% endblock %}

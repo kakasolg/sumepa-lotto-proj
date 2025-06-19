@@ -1,0 +1,56 @@
+{% for game in games %}
+{% set progress_width = range(60, 91) | random %}
+<div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+    <!-- Game Header -->
+    <div class="bg-gradient-to-r from-lotto-blue to-blue-600 p-6 text-white">
+        <div class="flex justify-between items-start">
+            <div>
+                <h3 class="text-xl font-bold mb-1">{{ game.name }}</h3>
+                <p class="text-blue-100 text-sm">Next Draw: {{ game.next_draw }}</p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Content -->
+    <div class="p-6">
+        <!-- Jackpot Display -->
+        <div class="text-center mb-6">
+            <p class="text-sm text-gray-600 mb-1">Current Jackpot</p>
+            <p class="text-4xl font-bold text-lotto-gold mb-2">{{ game.jackpot }}</p>
+            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                <div class="bg-gradient-to-r from-lotto-gold to-yellow-400 h-1.5 rounded-full" style="width: {{ progress_width }}%;"></div>
+            </div>
+        </div>
+        
+        <!-- Game Details -->
+        <div class="space-y-3 text-sm text-gray-600 mb-6">
+            <div class="flex justify-between">
+                <span>Ticket Price:</span>
+                <span class="font-semibold text-gray-900">${{ "%.2f"|format(game.ticket_price) }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Draws:</span>
+                <span class="font-semibold text-gray-900">{{ game.draw_days | join(', ') }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Next Draw:</span>
+                <span class="font-semibold text-gray-900">{{ game.next_draw }}</span>
+            </div>
+        </div>
+        
+        <!-- Play Button -->
+        <a href="{{ url_for('number_selection', game_id=game.id) }}" 
+           class="w-full bg-lotto-blue text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md flex items-center justify-center group-hover:scale-105 transform duration-300">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M19 10a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Play Now
+        </a>
+    </div>
+</div>
+{% endfor %}

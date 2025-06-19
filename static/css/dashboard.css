@@ -1,0 +1,16 @@
+/* Styles specific to the dashboard, tickets, and account pages */
+
+/* Example: Style for the active navigation tab */
+.nav-tab-active {
+    background-color: #1E40AF; /* lotto-blue */
+    color: white;
+}
+
+.nav-tab-inactive {
+    color: #4B5563; /* gray-600 */
+}
+
+.nav-tab-inactive:hover {
+    color: #1E40AF; /* lotto-blue */
+    background-color: #EFF6FF; /* blue-50 */
+}

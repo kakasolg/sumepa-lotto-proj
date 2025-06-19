@@ -2,6 +2,10 @@
 
 {% block title %}LottoGo - Play the Lottery: Anywhere, Any Device, Any Time{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
 {% block navigation %}
 <!-- Landing Page Navigation -->
 <nav class="bg-white shadow-sm border-b border-gray-200">
@@ -63,10 +67,11 @@
         </div>
     </div>
 </nav>
+{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="bg-gradient-to-br from-lotto-blue via-blue-700 to-lotto-gold text-white py-20">
+<section class="hero-section-gradient text-white py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
             <!-- Hero Content -->
@@ -295,8 +300,8 @@
 {% endblock %}
 
 {% block footer %}
-<!-- Footer -->
-<footer class="bg-gray-900 text-white py-12">
+<!-- Footer Section -->
+<footer class="bg-gray-800 text-white py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid md:grid-cols-4 gap-8">
             <!-- Company Info -->
@@ -376,4 +381,8 @@
         </div>
     </div>
 </footer>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/landing.js') }}"></script>
 {% endblock %}

@@ -1,0 +1,20 @@
+<!-- Quick Actions -->
+<div class="flex flex-wrap items-center gap-4 mb-6">
+    <button id="quick-pick-btn" 
+            class="bg-lotto-gold text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition-colors shadow-sm">
+        Quick Pick
+    </button>
+    
+    {% if favorites %}
+    <button id="favorites-btn" 
+            class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors shadow-sm">
+        Use Favorites
+    </button>
+    {% endif %}
+    
+    <button id="clear-btn" 
+            class="bg-gray-300 text-white px-6 py-2 rounded-lg transition-colors shadow-sm cursor-not-allowed"
+            disabled>
+        Clear All
+    </button>
+</div>

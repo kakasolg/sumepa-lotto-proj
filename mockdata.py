@@ -61,7 +61,7 @@ GAMES = {
         'main_numbers_range': (1, 47),
         'mega_number_range': (1, 27)
     }
-
+}
 
 # Mock ticket data - will be stored in session in this prototype
 # In production, this would be in the database
@@ -119,6 +119,7 @@ FAVORITE_NUMBERS = {
             'mega_ball': '07'
         }
     ]
+}
 
 
 # Service fees configuration
