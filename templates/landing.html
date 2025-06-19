@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}LottoGo - Play the Lottery: Anywhere, Any Device, Any Time{% endblock %}
+
+{% block navigation %}
+<!-- Landing Page Navigation -->
+<nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <!-- Logo -->
+            <div class="flex-shrink-0">
+                <a href="{{ url_for('landing') }}" class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-lotto-blue to-lotto-gold rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">L</span>
+                    </div>
+                    <span class="ml-3 text-2xl font-bold text-gray-900">LottoGo</span>
+                </a>
+            </div>
+            
+            <!-- Navigation Links -->
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-baseline space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-lotto-blue px-3 py-2 text-sm font-medium transition-colors">Features</a>
+                    <a href="#games" class="text-gray-600 hover:text-lotto-blue px-3 py-2 text-sm font-medium transition-colors">Games</a>
+                    <a href="#safety" class="text-gray-600 hover:text-lotto-blue px-3 py-2 text-sm font-medium transition-colors">Safety</a>
+                </div>
+            </div>
+            
+            <!-- Auth Buttons -->
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="{{ url_for('login') }}" 
+                   class="text-gray-600 hover:text-lotto-blue px-4 py-2 text-sm font-medium transition-colors">
+                    Sign In
+                </a>
+                <a href="{{ url_for('register') }}" 
+                   class="bg-lotto-blue text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-md">
+                    Get Started
+                </a>
+            </div>
+            
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button onclick="toggleMobileMenu()" 
+                        class="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden pb-4">
+            <div class="flex flex-col space-y-3">
+                <a href="#features" class="text-gray-600 hover:text-lotto-blue px-3 py-2 text-base font-medium">Features</a>
+                <a href="#games" class="text-gray-600 hover:text-lotto-blue px-3 py-2 text-base font-medium">Games</a>
+                <a href="#safety" class="text-gray-600 hover:text-lotto-blue px-3 py-2 text-base font-medium">Safety</a>
+                <div class="pt-4 border-t border-gray-200">
+                    <a href="{{ url_for('login') }}" class="block text-gray-600 px-3 py-2 text-base font-medium">Sign In</a>
+                    <a href="{{ url_for('register') }}" class="block bg-lotto-blue text-white px-3 py-2 rounded-lg text-base font-medium mt-2">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-lotto-blue via-blue-700 to-lotto-gold text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <!-- Hero Content -->
+            <div class="text-center lg:text-left">
+                <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-6">
+                    Play the Lottery:
+                    <span class="block text-lotto-gold">Anywhere, Any Device, Any Time</span>
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 text-blue-100">
+                    Official California lottery tickets delivered to your phone. 
+                    Safe, secure, and legal.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <a href="{{ url_for('register') }}" 
+                       class="bg-lotto-gold text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 transition-colors shadow-lg">
+                        Claim Free Ticket
+                    </a>
+                    <a href="{{ url_for('login') }}" 
+                       class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-lotto-blue transition-colors">
+                        Sign In
+                    </a>
+                </div>
+                <div class="mt-8 text-sm text-blue-200">
+                    <p>🔒 Secure • 🎯 Official • 💰 Regulated</p>
+                </div>
+            </div>
+            
+            <!-- Hero Image/Mock-up -->
+            <div class="relative">
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl">
+                    <div class="space-y-4">
+                        <!-- Mock phone interface -->
+                        <div class="bg-white rounded-lg p-6 text-gray-900">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="font-semibold">LottoGo</span>
+                                <span class="text-sm text-gray-600">Demo User</span>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3">
+                                {% for game in games %}
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <h3 class="font-semibold">{{ game.name }}</h3>
+                                            <p class="text-2xl font-bold text-lotto-gold">{{ game.jackpot }}</p>
+                                            <p class="text-sm text-gray-600">{{ game.next_draw }}</p>
+                                        </div>
+                                        <button class="bg-lotto-blue text-white px-4 py-2 rounded text-sm font-medium">
+                                            Play Now
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Why Choose LottoGo?
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                We make playing the lottery simple, safe, and convenient with cutting-edge technology and legal compliance.
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1: Easy -->
+            <div class="text-center p-8 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-lg transition-shadow">
+                <div class="w-16 h-16 bg-lotto-blue rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Easy</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Play from anywhere with just a few taps. No more driving to the store or waiting in lines. Your phone is your lottery terminal.
+                </p>
+            </div>
+            
+            <!-- Feature 2: Safe -->
+            <div class="text-center p-8 rounded-xl bg-gradient-to-br from-green-50 to-green-100 hover:shadow-lg transition-shadow">
+                <div class="w-16 h-16 bg-lotto-green rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Safe</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Bank-level security with encrypted transactions. Your tickets are stored safely and you'll never lose a winning ticket again.
+                </p>
+            </div>
+            
+            <!-- Feature 3: Fast -->
+            <div class="text-center p-8 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 hover:shadow-lg transition-shadow">
+                <div class="w-16 h-16 bg-lotto-gold rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Fast</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Instant ticket purchases and automatic result checking. Get notified immediately when you win - no more wondering or checking numbers manually.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Games Section -->
+<section id="games" class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Play Your Favorite Games
+            </h2>
+            <p class="text-xl text-gray-600">
+                All official California lottery games available 24/7
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            {% for game in games %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div class="bg-gradient-to-r from-lotto-blue to-blue-600 p-6 text-white">
+                    <h3 class="text-2xl font-bold mb-2">{{ game.name }}</h3>
+                    <p class="text-blue-100">Draw: {{ game.next_draw }}</p>
+                </div>
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <p class="text-sm text-gray-600 mb-2">Current Jackpot</p>
+                        <p class="text-4xl font-bold text-lotto-gold">{{ game.jackpot }}</p>
+                    </div>
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div class="flex justify-between">
+                            <span>Ticket Price:</span>
+                            <span class="font-semibold">${{ "%.2f"|format(game.ticket_price) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Draw Days:</span>
+                            <span class="font-semibold">{{ game.draw_days|join(', ') }}</span>
+                        </div>
+                    </div>
+                    <button class="w-full mt-6 bg-lotto-blue text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        Play {{ game.name }}
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Safety & Trust Section -->
+<section id="safety" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Your Safety is Our Priority
+            </h2>
+            <p class="text-xl text-gray-600">
+                Fully licensed and regulated by the California State Lottery Commission
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <!-- Trust Badges -->
+            <div class="space-y-8">
+                <div class="flex items-start space-x-4">
+                    <div class="w-12 h-12 bg-lotto-green rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Licensed & Regulated</h3>
+                        <p class="text-gray-600">Authorized courier service operating under California State Lottery regulations with full compliance monitoring.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-4">
+                    <div class="w-12 h-12 bg-lotto-blue rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Bank-Level Security</h3>
+                        <p class="text-gray-600">256-bit SSL encryption, secure payment processing, and industry-standard data protection protocols.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-4">
+                    <div class="w-12 h-12 bg-lotto-gold rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Guaranteed Payouts</h3>
+                        <p class="text-gray-600">All winnings are automatically credited to your account. We handle all prize claims and verification processes.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Legal Disclaimer -->
+            <div class="bg-gray-50 rounded-xl p-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Legal Compliance</h3>
+                <div class="space-y-4 text-sm text-gray-600">
+                    <p>LottoGo operates as an authorized lottery courier service in the state of California. We purchase official lottery tickets on behalf of our users from authorized California State Lottery retailers.</p>
+                    <p>All tickets are stored securely and scanned copies are provided to users for verification. Physical tickets remain in our secure facilities until prize claims are processed.</p>
+                    <p>Players must be 18 years or older and physically located in California to participate. Identity verification is required for all purchases.</p>
+                    <p class="font-semibold text-gray-900">Play responsibly. Gambling can be addictive. If you need help, call 1-800-GAMBLER.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid md:grid-cols-4 gap-8">
+            <!-- Company Info -->
+            <div class="col-span-2 md:col-span-1">
+                <div class="flex items-center mb-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-lotto-blue to-lotto-gold rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold">L</span>
+                    </div>
+                    <span class="ml-2 text-xl font-bold">LottoGo</span>
+                </div>
+                <p class="text-gray-400 mb-4">
+                    The safest and most convenient way to play the California lottery. 
+                    Official tickets, instant results, guaranteed payouts.
+                </p>
+                <div class="text-sm text-gray-500">
+                    <p>Licensed Lottery Courier Service</p>
+                    <p>California State Lottery Commission</p>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#games" class="hover:text-white transition-colors">Games</a></li>
+                    <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+                    <li><a href="#safety" class="hover:text-white transition-colors">Safety</a></li>
+                    <li><a href="{{ url_for('login') }}" class="hover:text-white transition-colors">Sign In</a></li>
+                </ul>
+            </div>
+            
+            <!-- Legal -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Legal</h3>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Responsible Gaming</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Age Verification</a></li>
+                </ul>
+            </div>
+            
+            <!-- Support -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Support</h3>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                    <li><a href="tel:1-800-GAMBLER" class="hover:text-white transition-colors">Problem Gambling: 1-800-GAMBLER</a></li>
+                </ul>
+                <div class="mt-6">
+                    <p class="text-sm text-gray-400 mb-2">Follow Us</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M20 10C20 4.477 15.523 0 10 0S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Bar -->
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+            <p class="text-gray-400 text-sm">
+                © 2025 LottoGo. All rights reserved. Licensed by the California State Lottery Commission.
+            </p>
+            <p class="text-gray-500 text-xs mt-2">
+                Must be 18+ and located in California. Play responsibly.
+            </p>
+        </div>
+    </div>
+</footer>
+{% endblock %}
