@@ -1,0 +1,15 @@
+{# templates/components/_game_rules.html #}
+
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">How to Play {{ game.name }}</h2>
+    <div class="prose max-w-none text-gray-600">
+        <ul>
+            <li>Select <strong>{{ game.main_numbers_count }} numbers</strong> from <strong>{{ game.main_numbers_range_low }} to {{ game.main_numbers_range_high }}</strong>.</li>
+            {% if game.special_ball_name %}
+            <li>Select <strong>1 {{ game.special_ball_name }}</strong> from <strong>{{ game.special_ball_range_low }} to {{ game.special_ball_range_high }}</strong>.</li>
+            {% endif %}
+            <li>Match all numbers to win the jackpot!</li>
+        </ul>
+        <p class="text-sm mt-4">This is a simplified guide for the prototype. For official rules, please refer to the California Lottery website.</p>
+    </div>
+</div>

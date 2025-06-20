@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}PayPal Checkout - LottoGo{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-blue-800 p-4 text-center">
+            <h2 class="text-2xl font-bold text-white">Simulated PayPal Checkout</h2>
+        </div>
+        <div class="p-8">
+            <div class="text-center mb-6">
+                <img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-200px.png" alt="PayPal Logo" class="mx-auto mb-4">
+                <p class="text-lg text-gray-700">You are about to pay</p>
+                {% if session.purchase_context %}
+                <p class="text-4xl font-bold text-gray-900 mt-2">${{ '%.2f'|format(session.purchase_context.total_price) }}</p>
+                {% endif %}
+                <p class="text-gray-600">to LottoGo Services</p>
+            </div>
+
+            <div class="bg-gray-100 p-4 rounded-lg mb-6">
+                <p class="text-sm text-gray-800">This is a demo environment. No real money will be transferred. Clicking 'Pay Now' will simulate a successful payment and complete your purchase.</p>
+            </div>
+
+            <form action="{{ url_for('finalize_purchase') }}" method="POST">
+                <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-3 px-4 rounded-full transition duration-300 ease-in-out text-lg">
+                    Pay Now
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <a href="{{ url_for('load_options') }}" class="text-sm text-gray-600 hover:underline">&larr; Choose another payment method</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

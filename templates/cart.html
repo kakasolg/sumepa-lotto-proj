@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Shopping Cart - LottoGo{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100 min-h-screen">
+    {% include 'components/_dashboard_nav.html' %}
+
+    <main class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-200">
+                <h1 class="text-2xl font-bold text-gray-800">Your Shopping Cart</h1>
+                <p class="text-sm text-gray-600 mt-1">Review your order before checking out.</p>
+            </div>
+
+            <div class="p-6">
+                {% if cart_items %}
+                    <div class="flow-root">
+                        <ul role="list" class="-my-4 divide-y divide-gray-200">
+                            {% for item in cart_items %}
+                                <li class="flex items-center py-4 space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-12 h-12 bg-lotto-blue text-white rounded-lg flex items-center justify-center text-lg font-bold">{{ item.game_name[0] }}</div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-md font-semibold text-gray-900 truncate">{{ item.game_name }}</p>
+                                        <p class="text-sm text-gray-500">
+                                            Numbers: {{ item.main_numbers | join(', ') }}
+                                            {% if item.special_number %}
+                                                <span class="font-bold text-lotto-gold"> | {{ item.special_number }}</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-4">
+                                        <p class="text-md font-medium text-gray-800">${{ "%.2f"|format(item.ticket_price) }}</p>
+                                        <a href="{{ url_for('remove_from_cart', item_index=loop.index0) }}" class="text-red-500 hover:text-red-700" title="Remove Item">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
+                                        </a>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <p class="text-lg font-semibold text-gray-900">Order Total</p>
+                            <p class="text-2xl font-bold text-gray-900">${{ "%.2f"|format(total_price) }}</p>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Taxes and fees calculated at checkout.</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-8 flex flex-col sm:flex-row-reverse items-center sm:justify-between">
+                        <a href="{{ url_for('checkout') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-lotto-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Proceed to Checkout
+                        </a>
+                        <div class="mt-4 sm:mt-0 flex items-center space-x-4">
+                            <a href="{{ url_for('dashboard') }}" class="text-sm font-medium text-lotto-blue hover:text-blue-700">Continue Shopping</a>
+                            <span class="text-gray-300">|</span>
+                            <a href="{{ url_for('clear_cart') }}" class="text-sm font-medium text-red-500 hover:text-red-700">Clear Cart</a>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <h3 class="mt-2 text-lg font-medium text-gray-900">Your cart is empty</h3>
+                        <p class="mt-1 text-sm text-gray-500">You have no items in your shopping cart.</p>
+                        <div class="mt-6">
+                            <a href="{{ url_for('dashboard') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-lotto-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Start Playing
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

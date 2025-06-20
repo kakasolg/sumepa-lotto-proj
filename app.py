@@ -160,14 +160,32 @@ def dashboard():
     return render_template('dashboard.html', user=user, games=all_games)
 
 
-@app.route('/account')
+@app.route('/account', methods=['GET', 'POST'])
 def account():
-    """User account page, redirects to my_tickets for now"""
+    """User account page, allows updating password."""
     login_check = require_login()
     if login_check:
         return login_check
+    
     user = get_current_user()
-    # Simple account page for now, can be expanded later
+
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not new_password or new_password != confirm_password:
+            flash('Passwords do not match or are empty.', 'error')
+            return redirect(url_for('account'))
+
+        # In a real app, you should hash the password.
+        # For this prototype, we'll store it as plain text.
+        user.password = new_password
+        db.session.commit()
+
+        flash('Your password has been updated successfully.', 'success')
+        return redirect(url_for('account'))
+
+    # For GET request, just render the page
     return render_template('account.html', user=user)
 
 
@@ -180,9 +198,14 @@ def my_tickets():
     
     user = get_current_user()
     
-    # Get tickets from DB, making sure to load the associated game data 
-    # to avoid extra queries in the template (lazy loading).
-    user_tickets = Ticket.query.filter_by(user_id=user.id).options(db.joinedload(Ticket.game)).order_by(Ticket.purchase_date.desc()).all()
+    # Calculate the cutoff date: 3 days ago from today
+    cutoff_date = datetime.utcnow() - timedelta(days=3)
+
+    # Get tickets from DB, filtering out any tickets whose draw date is older than the cutoff
+    user_tickets = Ticket.query.filter_by(user_id=user.id)\
+                                .filter(Ticket.draw_date >= cutoff_date)\
+                                .options(db.joinedload(Ticket.game))\
+                                .order_by(Ticket.purchase_date.desc()).all()
 
     return render_template('my_tickets.html', user=user, tickets=user_tickets)
 
@@ -199,140 +222,338 @@ def number_selection(game_id):
     game = db.session.get(Game, game_id)
 
     if not game:
-        flash('The requested game does not exist.', 'error')
+        flash('Game not found!', 'error')
         return redirect(url_for('dashboard'))
 
-    # Get user's favorite numbers for this game
-    favorite_numbers = FavoriteNumber.query.filter_by(user_id=user.id, game_id=game.id).all()
+    return render_template('number_selection.html', user=user, game=game)
 
-    return render_template('number_selection.html', user=user, game=game, favorites=favorite_numbers)
-
-@app.route('/cart')
-def cart():
-    """Shopping cart view"""
-    login_check = require_login()
-    if login_check:
-        return login_check
-        
-    user = get_current_user()
-    
-    # In this prototype, the cart is stored in the session
-    cart_items = session.get('cart', [])
-    
-    # Calculate total
-    total_price = sum(item['price'] for item in cart_items)
-
-    return render_template('cart.html', user=user, cart_items=cart_items, total_price=total_price)
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    """Add selected numbers to cart"""
     login_check = require_login()
     if login_check:
-        return login_check
+        return jsonify({'success': False, 'message': 'Authentication required'}), 401
 
     data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid request'}), 400
+
     game_id = data.get('game_id')
-    tickets = data.get('tickets')
-
-    if not game_id or not tickets:
-        return jsonify({'success': False, 'message': 'Missing game or ticket data.'}), 400
-
+    tickets_data = data.get('tickets')
+    user = get_current_user()
     game = db.session.get(Game, game_id)
-    if not game:
-        return jsonify({'success': False, 'message': 'Game not found.'}), 404
 
-    cart = session.get('cart', [])
-    
-    for ticket in tickets:
-        cart.append({
+    if not game or not tickets_data:
+        return jsonify({'success': False, 'message': 'Invalid game or ticket data'}), 400
+
+    if 'cart' not in session:
+        session['cart'] = []
+
+    for ticket_data in tickets_data:
+        special_ball_field = game.special_ball_name.lower().replace(' ', '_') if game.special_ball_name else None
+        
+        new_ticket_for_cart = {
             'game_id': game.id,
             'game_name': game.name,
-            'numbers': ticket['numbers'],
-            'special_ball': ticket.get(game.special_ball_name.lower().replace(" ", "_") if game.special_ball_name else 'special_ball'),
-            'price': game.ticket_price
-        })
-        
-    session['cart'] = cart
-    flash(f'{len(tickets)} ticket(s) for {game.name} added to your cart!', 'success')
-    return jsonify({'success': True, 'cart_count': len(cart)})
+            'ticket_price': game.ticket_price,
+            'main_numbers': ticket_data.get('numbers'),
+            'special_number': ticket_data.get(special_ball_field) if special_ball_field else None
+        }
+        session['cart'].append(new_ticket_for_cart)
 
-@app.route('/remove_from_cart/<int:item_index>', methods=['POST'])
-def remove_from_cart(item_index):
-    """Remove an item from the cart"""
-    login_check = require_login()
-    if login_check:
-        return login_check
-
-    cart = session.get('cart', [])
-    if item_index < 0 or item_index >= len(cart):
-        return jsonify({'success': False, 'message': 'Invalid cart item index.'}), 400
-
-    # Remove the item
-    cart.pop(item_index)
-    session['cart'] = cart
-    
-    flash('Cart item removed.', 'success')
-    return jsonify({'success': True, 'cart_count': len(cart)})
-
-# Checkout and Payment Routes
-
-# Define service fees as constants
-SERVICE_FEE_PERCENTAGE = 0.10 # 10% service fee
-PROCESSING_FEE = 0.50 # $0.50 processing fee
-
-@app.route('/checkout')
-def checkout():
-    """Checkout process - order review and payment"""
-    login_check = require_login()
-    if login_check:
-        return login_check
-    
-    user = get_current_user()
-    cart_items = session.get('cart', [])
-    
-    if not cart_items:
-        flash('Your cart is empty.', 'warning')
-        return redirect(url_for('dashboard'))
-    
-    # Calculate totals
-    subtotal = sum(item['price'] for item in cart_items)
-    service_fee = subtotal * SERVICE_FEE_PERCENTAGE
-    processing_fee = PROCESSING_FEE
-    total = subtotal + service_fee + processing_fee
-    
-    # Check if user needs identity verification
-    needs_verification = not user.is_identity_verified
-    
-    return render_template('checkout.html', 
-                         user=user, cart_items=cart_items,
-                         subtotal=subtotal, service_fee=service_fee,
-                         processing_fee=processing_fee, total=total,
-                         needs_verification=needs_verification)
-
-@app.route('/process_purchase', methods=['POST'])
-def process_purchase():
-    """Process the purchase (mock implementation)"""
-    login_check = require_login()
-    if login_check:
-        return login_check
-    
-    user = get_current_user()
-    cart_items = session.get('cart', [])
-    
-    if not cart_items:
-        flash('Your cart is empty.', 'warning')
-        return redirect(url_for('dashboard'))
-    
-    # TODO: In production, process actual payment and create real tickets
-    # For now, just simulate successful purchase
-    
-    # Clear cart
-    session['cart'] = []
     session.modified = True
+
+    return jsonify({'success': True, 'cart_count': len(session['cart'])})
+
+
+@app.route('/cart')
+def cart():
+    login_check = require_login()
+    if login_check:
+        return login_check
     
-    flash(f'Purchase successful! You bought {len(cart_items)} ticket(s).', 'success')
-    return redirect(url_for('tickets'))
+    user = get_current_user()
+    cart_items = session.get('cart', [])
+    
+    total_price = sum(item['ticket_price'] for item in cart_items)
+
+    return render_template('cart.html', user=user, cart_items=cart_items, total_price=total_price)
+
+
+@app.route('/remove_from_cart/<int:item_index>')
+def remove_from_cart(item_index):
+    login_check = require_login()
+    if login_check:
+        return login_check
+
+    if 'cart' in session and len(session['cart']) > item_index:
+        session['cart'].pop(item_index)
+        session.modified = True
+        flash('Item removed from your cart.', 'success')
+    else:
+        flash('Item not found in your cart.', 'error')
+
+    return redirect(url_for('cart'))
+
+
+@app.route('/clear_cart')
+def clear_cart():
+    login_check = require_login()
+    if login_check:
+        return login_check
+
+    if 'cart' in session:
+        session.pop('cart', None)
+        flash('Your cart has been cleared.', 'success')
+
+    return redirect(url_for('cart'))
+
+
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    login_check = require_login()
+    if login_check:
+        return login_check
+
+    user = get_current_user()
+    cart_items = session.get('cart', [])
+
+    if not cart_items:
+        flash('Your cart is empty.', 'info')
+        return redirect(url_for('dashboard'))
+
+    total_price = sum(item['ticket_price'] for item in cart_items)
+
+    if request.method == 'POST':
+        # The form submission now leads to the verification flow
+        # The actual purchase logic will be handled later
+        
+        # Store cart and total price in session to retrieve later
+        session['purchase_context'] = {
+            'cart': cart_items,
+            'total_price': total_price
+        }
+        session.modified = True
+
+        if user.wallet_balance >= total_price:
+            # If balance is sufficient, proceed to identity verification
+            return redirect(url_for('verify_age'))
+        else:
+            # If balance is insufficient, redirect to add funds
+            flash('You have insufficient funds. Please add funds to your wallet.', 'warning')
+            return redirect(url_for('load_options'))
+
+    return render_template('checkout.html', user=user, cart_items=cart_items, total_price=total_price)
+
+
+# --- Verification and Purchase Flow ---
+@app.route('/verify_age', methods=['GET'])
+def verify_age():
+    login_check = require_login()
+    if login_check: return login_check
+    return render_template('verify_age.html', user=get_current_user())
+
+@app.route('/verify_manual', methods=['GET', 'POST'])
+def verify_manual():
+    login_check = require_login()
+    if login_check: return login_check
+
+    if request.method == 'POST':
+        # In a real app, this data would be sent to an identity provider.
+        # For this demo, we just check if fields are filled and move on.
+        full_name = request.form.get('full_name')
+        dob = request.form.get('dob')
+        address = request.form.get('address')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        zip_code = request.form.get('zip_code')
+
+        if not all([full_name, dob, address, city, state, zip_code]):
+            flash('Please fill out all required fields.', 'error')
+            return redirect(url_for('verify_manual'))
+        
+        # Mark verification as passed in session and proceed
+        session['identity_verified_for_purchase'] = True
+        session.modified = True
+        
+        # After verification, check wallet balance again before proceeding
+        user = get_current_user()
+        purchase_context = session.get('purchase_context', {})
+        total_price = purchase_context.get('total_price', 0)
+
+        if user.wallet_balance >= total_price:
+             # If funds are sufficient, go to the confirmation page
+            return redirect(url_for('confirm_purchase'))
+        else:
+            # If funds are insufficient, go to payment options
+            flash('Identity verified, but your wallet balance is too low.', 'warning')
+            return redirect(url_for('load_options'))
+
+    return render_template('verify_manual.html', user=get_current_user())
+
+@app.route('/confirm_purchase', methods=['GET'])
+def confirm_purchase():
+    login_check = require_login()
+    if login_check: return login_check
+
+    # Ensure user has verified their identity for this purchase
+    if not session.get('identity_verified_for_purchase'):
+        flash('Please verify your identity first.', 'error')
+        return redirect(url_for('verify_age'))
+
+    # Ensure there is a purchase context
+    if 'purchase_context' not in session:
+        flash('Your session has expired. Please start over.', 'error')
+        return redirect(url_for('cart'))
+
+    return render_template('confirm_purchase.html', user=get_current_user(), session=session)
+
+
+@app.route('/load_options', methods=['GET'])
+def load_options():
+    login_check = require_login()
+    if login_check: return login_check
+    # User might land here without having verified identity if funds were insufficient from checkout
+    # if not session.get('identity_verified_for_purchase'):
+    #     return redirect(url_for('verify_age'))
+    
+    purchase_context = session.get('purchase_context', {})
+    
+    return render_template('load_options.html', user=get_current_user(), session=session)
+
+@app.route('/paypal_info', methods=['GET'])
+def paypal_info():
+    login_check = require_login()
+    if login_check: return login_check
+    # Allow access even if not verified, as they might be funding account first
+    # if not session.get('identity_verified_for_purchase'):
+    #     return redirect(url_for('verify_age'))
+    return render_template('paypal_info.html', user=get_current_user(), session=session)
+
+
+@app.route('/finalize_purchase', methods=['POST'])
+def finalize_purchase():
+    login_check = require_login()
+    if login_check: return login_check
+
+    user = get_current_user()
+    purchase_context = session.get('purchase_context')
+
+    # Security check: Ensure user has gone through the necessary steps
+    if not purchase_context or not session.get('identity_verified_for_purchase'):
+        flash('Your session is invalid or has expired. Please try again.', 'error')
+        return redirect(url_for('dashboard'))
+
+    # This is a simulation. If the user came from the payment flow,
+    # we pretend they topped up their wallet.
+    # We add the required amount to their balance before proceeding.
+    total_price = purchase_context['total_price']
+    if user.wallet_balance < total_price:
+        amount_to_add = total_price - user.wallet_balance
+        user.wallet_balance += amount_to_add
+        db.session.commit()
+        flash(f'Successfully added ${amount_to_add:.2f} to your wallet.', 'success')
+
+
+    # Now, perform the final check and purchase logic
+    if user.wallet_balance >= total_price:
+        user.wallet_balance -= total_price
+        for item in purchase_context['cart']:
+            game = db.session.get(Game, item['game_id'])
+            if not game:
+                continue # Or handle error appropriately
+
+            # Parse draw date from string, with a fallback
+            try:
+                draw_date = datetime.strptime(game.next_draw.split('.')[0], '%Y-%m-%d %H:%M:%S')
+            except (ValueError, AttributeError):
+                draw_date = datetime.utcnow() + timedelta(days=3) # Fallback
+
+            new_ticket = Ticket(
+                id=f"TICKET-{user.id}-{int(datetime.utcnow().timestamp())}-{random.randint(1000, 9999)}",
+                user_id=user.id,
+                game_id=item['game_id'],
+                purchase_date=datetime.utcnow(),
+                draw_date=draw_date,
+                numbers=",".join(map(str, item['main_numbers'])),
+                special_ball=str(item['special_number']) if item['special_number'] is not None else None,
+                status='active',
+                winnings=0.0
+            )
+            db.session.add(new_ticket)
+        
+        db.session.commit()
+
+        # Clear session data related to the purchase
+        session.pop('cart', None)
+        session.pop('purchase_context', None)
+        session.pop('identity_verified_for_purchase', None)
+        session.modified = True
+
+        flash('Your purchase was successful! Good luck!', 'success')
+        return redirect(url_for('my_tickets'))
+    else:
+        flash('An error occurred with your wallet balance.', 'error')
+        return redirect(url_for('checkout'))
+
+# --- Purchase Flow Success --- 
+@app.route('/purchase_success')
+def purchase_success():
+    login_check = require_login()
+    if login_check: return login_check
+    return render_template('purchase_success.html')
+
+
+# --- Admin Management Routes ---
+@app.route('/adminmanage')
+def admin_manage():
+    # A simple, unprotected admin page for demo purposes.
+    all_users = User.query.all()
+    all_tickets = Ticket.query.order_by(Ticket.purchase_date.desc()).all()
+    return render_template('admin_manage.html', all_users=all_users, all_tickets=all_tickets, is_admin_view=True)
+
+@app.route('/admin/add_funds/<int:user_id>', methods=['POST'])
+def admin_add_funds(user_id):
+    user = db.session.get(User, user_id)
+    if user:
+        try:
+            amount = float(request.form.get('amount'))
+            user.wallet_balance += amount
+            db.session.commit()
+            flash(f'Successfully added ${amount:.2f} to {user.name}\'s wallet.', 'success')
+        except (ValueError, TypeError):
+            flash('Invalid amount entered.', 'error')
+    else:
+        flash('User not found.', 'error')
+    return redirect(url_for('admin_manage'))
+
+@app.route('/admin/delete_ticket/<ticket_id>', methods=['POST'])
+def admin_delete_ticket(ticket_id):
+    ticket = db.session.get(Ticket, ticket_id)
+    if ticket:
+        db.session.delete(ticket)
+        db.session.commit()
+        flash(f'Ticket {ticket_id} has been deleted successfully.', 'success')
+    else:
+        flash('Ticket not found.', 'error')
+    return redirect(url_for('admin_manage'))
+
+
+@app.route('/admin/update_password/<int:user_id>', methods=['POST'])
+def admin_update_password(user_id):
+    user = db.session.get(User, user_id)
+    if user:
+        new_password = request.form.get('new_password')
+        if new_password and len(new_password) >= 4:
+            user.password = new_password # In a real app, hash this
+            db.session.commit()
+            flash(f'Successfully updated password for {user.name}.', 'success')
+        else:
+            flash('Password must be at least 4 characters long.', 'error')
+    else:
+        flash('User not found.', 'error')
+    return redirect(url_for('admin_manage'))
+
 
 # API Routes for AJAX calls
 @app.route('/api/quick_pick/<game_id>')

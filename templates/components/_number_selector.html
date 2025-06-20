@@ -51,10 +51,10 @@
     <div class="mb-8">
         <h3 class="text-lg font-medium text-gray-700 mb-4">
             Pick {{ game.main_numbers_count }} Main Numbers 
-            <span class="font-normal text-gray-500">({{ game.main_numbers_range[0] }}-{{ game.main_numbers_range[1] }})</span>
+            <span class="font-normal text-gray-500">({{ game.main_numbers_range_low }}-{{ game.main_numbers_range_high }})</span>
         </h3>
         <div class="grid grid-cols-7 sm:grid-cols-10 gap-2 max-w-2xl">
-            {% for num in range(game.main_numbers_range[0], game.main_numbers_range[1] + 1) %}
+            {% for num in range(game.main_numbers_range_low, game.main_numbers_range_high + 1) %}
             <button class="main-number-btn number-btn" data-number="{{ num }}">
                 {{ num }}
             </button>
@@ -65,15 +65,38 @@
     <!-- Special Number Grid -->
     <div class="mb-8">
         <h3 class="text-lg font-medium text-gray-700 mb-4">
-            Pick 1 {{ special_name }} 
-            <span class="font-normal text-gray-500">({{ special_range[0] }}-{{ special_range[1] }})</span>
+            Pick 1 {{ game.special_ball_name }} 
+            <span class="font-normal text-gray-500">({{ game.special_ball_range_low }}-{{ game.special_ball_range_high }})</span>
         </h3>
         <div class="grid grid-cols-7 sm:grid-cols-10 gap-2 max-w-xl">
-            {% for num in range(special_range[0], special_range[1] + 1) %}
+            {% for num in range(game.special_ball_range_low, game.special_ball_range_high + 1) %}
             <button class="special-number-btn number-btn special-btn" data-number="{{ num }}">
                 {{ num }}
             </button>
             {% endfor %}
         </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
+        <button id="add-to-list-btn" 
+                class="bg-lotto-blue text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"></path></svg>
+            Add to List
+        </button>
+        <div class="text-right">
+            <p class="text-lg font-semibold text-gray-800">Total Price: <span id="total-price-display">$0.00</span></p>
+            <p class="text-sm text-gray-500"><span id="ticket-count-display">0</span> Tickets Selected</p>
+        </div>
+    </div>
+
+    <!-- Tickets List -->
+    <div id="tickets-list-container" class="mt-8"></div>
+
+    <!-- Add All to Cart Button -->
+    <div class="mt-8 text-center">
+        <button id="add-all-to-cart-btn" class="w-full max-w-md bg-green-500 text-white font-bold py-4 px-8 rounded-lg hover:bg-green-600 transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed">
+            Add All Tickets to Cart
+        </button>
     </div>
 </div>

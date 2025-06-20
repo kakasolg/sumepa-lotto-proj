@@ -1,0 +1,33 @@
+/* static/css/number_selection.css */
+
+.number-btn {
+    width: 3rem; /* 48px */
+    height: 3rem; /* 48px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px; /* full */
+    border-width: 2px;
+    border-color: #D1D5DB; /* gray-300 */
+    color: #374151; /* gray-700 */
+    font-weight: 600; /* semibold */
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+
+.number-btn:hover {
+    background-color: #F3F4F6; /* gray-100 */
+    border-color: #9CA3AF; /* gray-400 */
+}
+
+.number-btn.selected {
+    background-color: #3B82F6; /* blue-500 */
+    color: white;
+    border-color: #3B82F6; /* blue-500 */
+}
+
+.special-btn.selected {
+    background-color: #EF4444; /* red-500 */
+    color: white;
+    border-color: #EF4444; /* red-500 */
+}

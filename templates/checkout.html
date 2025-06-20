@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - LottoGo{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100 min-h-screen">
+    {% include 'components/_dashboard_nav.html' %}
+
+    <main class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Checkout</h1>
+        
+        <form action="{{ url_for('checkout') }}" method="POST">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Order Summary -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white shadow-lg rounded-lg">
+                        <div class="px-6 py-5 border-b border-gray-200">
+                            <h2 class="text-xl font-semibold text-gray-800">Order Summary</h2>
+                        </div>
+                        <div class="p-6">
+                            {% if cart_items %}
+                                <ul role="list" class="divide-y divide-gray-200">
+                                    {% for item in cart_items %}
+                                        <li class="flex py-4 space-x-4">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-md font-medium text-gray-900">{{ item.game_name }}</p>
+                                                <p class="text-sm text-gray-500">
+                                                    {{ item.main_numbers | join(', ') }}
+                                                    {% if item.special_number %}
+                                                        <span class="font-bold text-lotto-gold">| {{ item.special_number }}</span>
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                            <p class="text-md font-medium text-gray-800">${{ "%.2f"|format(item.ticket_price) }}</p>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-gray-600">Your cart is empty.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white shadow-lg rounded-lg p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">Payment Details</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Subtotal</span>
+                                <span class="font-medium text-gray-900">${{ "%.2f"|format(total_price) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Fees</span>
+                                <span class="font-medium text-gray-900">$0.00</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold text-gray-900 border-t pt-4 mt-2">
+                                <span>Total</span>
+                                <span>${{ "%.2f"|format(total_price) }}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 border-t pt-6">
+                            <h3 class="text-md font-semibold text-gray-800">Pay with Wallet</h3>
+                            <div class="flex justify-between mt-2">
+                                <span class="text-gray-600">Available Balance</span>
+                                <span class="font-medium text-lotto-gold">${{ "%.2f"|format(user.wallet_balance) }}</span>
+                            </div>
+                            
+                            {% set new_balance = user.wallet_balance - total_price %}
+                            <div class="flex justify-between mt-1">
+                                <span class="text-gray-600">Balance After</span>
+                                <span class="font-medium {% if new_balance < 0 %}text-red-500{% else %}text-gray-900{% endif %}">
+                                    ${{ "%.2f"|format(new_balance) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            {% if new_balance >= 0 %}
+                                <button type="submit" class="w-full bg-lotto-blue hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                                    Proceed to Identity Verification
+                                </button>
+                            {% else %}
+                                <div class="text-center p-3 bg-red-100 text-red-700 rounded-lg">
+                                    <p class="font-semibold">Insufficient Funds</p>
+                                    <p class="text-sm">Please add funds to your wallet to complete this purchase.</p>
+                                </div>
+                                <a href="#" class="mt-4 w-full block text-center bg-gray-200 text-gray-600 font-bold py-3 px-4 rounded-lg">
+                                    Add Funds
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+</div>
+{% endblock %}

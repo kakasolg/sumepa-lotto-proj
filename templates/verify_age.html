@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Age - LottoGo{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold text-gray-800">Identity Verification</h2>
+                <p class="text-gray-600 mt-2">To comply with regulations, we need to verify your age. Please choose one of the options below.</p>
+            </div>
+
+            <div class="mt-8">
+                <a href="#" class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out mb-4">
+                    <i class="fas fa-camera mr-2"></i> Scan Your ID
+                </a>
+                <p class="text-center text-sm text-gray-500 mb-4">Use your device's camera to scan your driver's license or ID card. This is the fastest option.</p>
+
+                <a href="{{ url_for('verify_manual') }}" class="block w-full text-center bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
+                    <i class="fas fa-keyboard mr-2"></i> Enter Information Manually
+                </a>
+                <p class="text-center text-sm text-gray-500 mt-2">If you can't scan your ID, you can enter your details manually.</p>
+            </div>
+
+            <div class="mt-8 text-center">
+                <a href="{{ url_for('cart') }}" class="text-sm text-gray-600 hover:underline">&larr; Back to Cart</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -7,83 +7,42 @@
 {% endblock %}
 
 {% block navigation %}
-<!-- Number Selection Navigation -->
-<nav class="bg-white shadow-sm border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <!-- Logo -->
-            <div class="flex-shrink-0">
-                <a href="{{ url_for('dashboard') }}" class="flex items-center">
-                    <div class="w-10 h-10 bg-gradient-to-br from-lotto-blue to-lotto-gold rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-lg">L</span>
-                    </div>
-                    <span class="ml-3 text-2xl font-bold text-gray-900">LottoGo</span>
-                </a>
-            </div>
-            
-            <!-- Back Button -->
-            <div class="flex items-center space-x-4">
-                <a href="{{ url_for('dashboard') }}" 
-                   class="text-gray-600 hover:text-gray-900 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                    Back to Games
-                </a>
-                
-                <!-- User Info -->
-                <div class="text-right">
-                    <p class="text-sm text-gray-600">{{ user.name }}</p>
-                    <p class="text-lg font-bold text-lotto-gold">${{ "%.2f"|format(user.wallet_balance) }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
+    {% include 'components/_dashboard_nav.html' %}
 {% endblock %}
 
 {% block content %}
-{% set special_range = game.powerball_range or game.mega_ball_range or game.mega_number_range %}
-{% set special_name = 'Powerball' if game.id == 'powerball' else 'Mega Ball' if game.id == 'mega_millions' else 'Mega Number' %}
-
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
         <!-- Game Header -->
         {% include 'components/_game_header.html' %}
 
-        <!-- Number Selection Card -->
-        <div id="number-selection-card" 
-             class="bg-white rounded-xl shadow-lg p-6 mb-8"
+        <!-- Number Selection Container -->
+        <div id="number-selection-container" 
+             data-game-id="{{ game.id }}"
              data-main-numbers-count="{{ game.main_numbers_count }}"
-             data-ticket-price="{{ game.ticket_price }}"
-             data-main-numbers-range="{{ game.main_numbers_range | tojson }}"
-             data-special-range="{{ special_range | tojson }}"
-             data-favorites="{{ favorites | tojson }}">
+             data-main-numbers-range="{{ [game.main_numbers_range_low, game.main_numbers_range_high] | tojson }}"
+             data-special-ball-name="{{ game.special_ball_name }}"
+             data-special-ball-range="{{ [game.special_ball_range_low, game.special_ball_range_high] | tojson }}"
+             data-ticket-price="{{ game.ticket_price }}">
 
-            <h2 class="text-xl font-semibold text-gray-900 mb-6">Select Your Numbers</h2>
-            
-            {% include 'components/_number_display.html' %}
+            <!-- This is where the number selector component will be rendered -->
+            {% include 'components/_number_selector.html' %}
 
-            {% include 'components/_quick_actions.html' %}
-
-            {% include 'components/_number_selector.html' with context %}
-
-            <!-- Add to Cart Button -->
-            <div class="flex justify-center">
-                <button id="add-to-cart-btn" 
-                        class="w-full max-w-md bg-gray-300 text-white py-4 px-8 rounded-lg font-semibold text-lg cursor-not-allowed"
-                        disabled>
-                    Select Numbers to Continue
-                </button>
-            </div>
         </div>
 
         <!-- Game Rules -->
         {% include 'components/_game_rules.html' %}
+
+        <!-- Favorites Section -->
+        {% if favorites %}
+            {% include 'components/_favorites_list.html' %}
+        {% endif %}
+
     </div>
 </div>
 {% endblock %}
 
-{% block extra_scripts %}
+{% block extra_js %}
 <script src="{{ url_for('static', filename='js/number_selection.js') }}"></script>
 {% endblock %}

@@ -35,7 +35,11 @@
             </div>
             <div class="flex justify-between">
                 <span>Draws:</span>
-                <span class="font-semibold text-gray-900">{{ game.draw_days | join(', ') }}</span>
+                <span class="font-semibold text-gray-900">{{ game.draw_days }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Odds of Winning:</span>
+                <span class="font-semibold text-gray-900">1 in 292M</span>
             </div>
             <div class="flex justify-between">
                 <span>Next Draw:</span>
@@ -44,13 +48,23 @@
         </div>
         
         <!-- Play Button -->
+        {% if session.user_id %}
         <a href="{{ url_for('number_selection', game_id=game.id) }}" 
            class="w-full bg-lotto-blue text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md flex items-center justify-center group-hover:scale-105 transform duration-300">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M19 10a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Play Now
+            Play {{ game.name.split(' ')[0] }}
         </a>
+        {% else %}
+        <a href="{{ url_for('login') }}" 
+           class="w-full bg-lotto-blue text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md flex items-center justify-center group-hover:scale-105 transform duration-300">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M19 10a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Play {{ game.name.split(' ')[0] }}
+        </a>
+        {% endif %}
     </div>
 </div>
 {% endfor %}

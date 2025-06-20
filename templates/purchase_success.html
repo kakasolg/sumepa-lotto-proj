@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Purchase Successful - LottoGo{% endblock %}
+
+{% block head %}
+{{ super() }}
+<meta http-equiv="refresh" content="5;url={{ url_for('my_tickets') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16 text-center">
+    <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-8">
+        <div class="text-green-500">
+            <svg class="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800 mt-4">Purchase Successful!</h1>
+        <p class="text-gray-600 mt-2">Your tickets have been added to your account. Good luck!</p>
+        
+        <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+            <p class="text-gray-700">You will be automatically redirected to <a href="{{ url_for('my_tickets') }}" class="text-blue-500 hover:underline font-semibold">My Tickets</a> in 5 seconds.</p>
+            <p class="text-sm text-gray-500 mt-2">(If you are not redirected, <a href="{{ url_for('my_tickets') }}" class="text-blue-500 hover:underline">click here</a>.)</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

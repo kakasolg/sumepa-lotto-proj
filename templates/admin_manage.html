@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - LottoGo{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Admin Dashboard</h1>
+        <p class="text-gray-600">Manage users and view all tickets in the system.</p>
+    </div>
+
+    <!-- User Management Section -->
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">User Management</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="py-2 px-4 border-b">User</th>
+                        <th class="py-2 px-4 border-b">Wallet</th>
+                        <th class="py-2 px-4 border-b">Add Funds</th>
+                        <th class="py-2 px-4 border-b">Change Password</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in all_users %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-2 px-4 border-b">
+                            <div class="font-semibold">{{ user.name }}</div>
+                            <div class="text-sm text-gray-500">{{ user.email }}</div>
+                        </td>
+                        <td class="py-2 px-4 border-b">
+                            <span class="font-mono text-green-600 font-bold">${{ "%.2f"|format(user.wallet_balance) }}</span>
+                        </td>
+                        <td class="py-2 px-4 border-b">
+                            <form action="{{ url_for('admin_add_funds', user_id=user.id) }}" method="POST" class="flex items-center">
+                                <input type="number" name="amount" placeholder="Amount" class="w-24 px-2 py-1 border rounded-md text-sm" step="0.01" required>
+                                <button type="submit" class="ml-2 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600">Add</button>
+                            </form>
+                        </td>
+                        <td class="py-2 px-4 border-b">
+                            <form action="{{ url_for('admin_update_password', user_id=user.id) }}" method="POST" class="flex items-center">
+                                <input type="password" name="new_password" placeholder="New Password" class="w-32 px-2 py-1 border rounded-md text-sm" required>
+                                <button type="submit" class="ml-2 px-3 py-1 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Ticket Management Section -->
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">All Tickets ({{ all_tickets|length }})</h2>
+        {% with tickets=all_tickets %}
+            {% include 'components/_ticket_list.html' %}
+        {% endwith %}
+    </div>
+
+</div>
+{% endblock %}
